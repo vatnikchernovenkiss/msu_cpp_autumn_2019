@@ -49,11 +49,11 @@ int main(int argc, char **argv) {
 			cout<<"Allocated "<<atoi(argv[i])<<" bytes"<<endl;
 		}
 	} 
-	catch(int &k) {
+	catch(int k) {
 		cout<<"Error! Unable to allocate memory of size "<<k;
 		return 1;
 	}
-	catch(bad_alloc) {
+	catch(bad_alloc &error) {
 		cout<<"Error! Incorrect initial size";
 		return 1;
 	}
