@@ -5,16 +5,16 @@ using namespace std;
 
 class Matrix {
 	class Row {
-		int cols_number;
+		size_t cols_number;
 		int *array;
-		friend class Matrix;
+		Row(const Row &he){};
 	public:
 	
 		Row():cols_number(0), array(nullptr){}
 		
 		Row(int k):cols_number(k), array(new int[cols_number]){}
 		
-		int& operator[] (int ind) {
+		int& operator[] (size_t ind) {
 			if (ind >= cols_number) {
 				throw std::out_of_range("");
 			}
@@ -22,7 +22,7 @@ class Matrix {
 		}
 		
 		void operator *= (int k) {
-			for (int i = 0; i < cols_number; ++i) {
+			for (size_t i = 0; i < cols_number; ++i) {
 				array[i] *= k;
 			}
 		}
@@ -31,7 +31,7 @@ class Matrix {
 			if (cols_number != he.cols_number) {
 				return false;
 			}
-			for (int i = 0; i < cols_number; ++i) {
+			for (size_t i = 0; i < cols_number; ++i) {
 				if (array[i] != he.array[i]) {
 					return false;
 				}
@@ -39,33 +39,40 @@ class Matrix {
 			return true;
 		}
 		
-		int Size() const {
+		size_t Size() const {
 			return cols_number;
 		}
 		
 		void operator = (const Row& he) {
+			if (array) {
+				delete [] array;
+			}
 			array = new int[he.cols_number];
-			for (int i = 0; i < he.cols_number; ++i) {
+			for (size_t i = 0; i < he.cols_number; ++i) {
 				array[i] = he.array[i];
 			}
 			cols_number = he.cols_number;
 		}
 		
 		~Row() {
-			delete [] array;
+			if (array) {
+				delete [] array;
+			}
 		}
 	};
-	int rows_number;
+	size_t rows_number;
 	Row *rows;
+	Matrix(const Matrix &he){};
+	void operator = (const Matrix &he){};
 public:
 
-	Matrix(int rows_number = 0, int cols_number = 0):rows_number(rows_number), rows(new Row [rows_number]){
-		for (int i = 0; i < rows_number; ++i) {
+	Matrix(size_t rows_number = 0, size_t cols_number = 0):rows_number(rows_number), rows(new Row[rows_number]) {
+		for (size_t i = 0; i < rows_number; ++i) {
 			rows[i] = Row(cols_number);
 		}
 	}
 	
-	Row& operator[] (int ind) {
+	Row& operator[] (size_t ind) {
 		if (ind >= rows_number) {
 			throw std::out_of_range("");
 		}
@@ -73,7 +80,7 @@ public:
 	}
 	
 	Matrix& operator *= (int k) {
-		for (int i = 0; i < rows_number; ++i) {
+		for (size_t i = 0; i < rows_number; ++i) {
 			rows[i] *= k;
 		}
 		return *this;
@@ -83,7 +90,7 @@ public:
 			if (rows_number != he.rows_number) {
 				return false;
 			}
-			for (int i = 0; i < rows_number; ++i) {
+			for (size_t i = 0; i < rows_number; ++i) {
 				if (!(rows[i] == he.rows[i])) {
 					return false;
 				}
@@ -95,11 +102,11 @@ public:
 		return !(*this == he);
 	}
 	
-	int GetColumns() const {
+	size_t GetColumns() const {
 		return rows[0].Size();
 	}
 	
-	int GetRows() const {
+	size_t GetRows() const {
 		return rows_number;
 	}
 	
