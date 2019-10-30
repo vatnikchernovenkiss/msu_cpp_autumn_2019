@@ -30,7 +30,7 @@ class Matrix {
 		}
 		friend class Matrix;
 	public:		
-		Row(int k):cols_number(k), array(new int[cols_number]){}
+		Row(int k):cols_number(k), array(new int[cols_number]()){}
 		
 		int& operator[] (size_t ind) {
 			if (ind >= cols_number) {
