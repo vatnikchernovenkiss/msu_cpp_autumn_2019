@@ -8,19 +8,9 @@ class Matrix {
 		size_t cols_number;
 		int *array;
 		Row(const Row &he){};
-	public:
-	
-		Row():cols_number(0), array(nullptr){}
-		
-		Row(int k):cols_number(k), array(new int[cols_number]){}
-		
-		int& operator[] (size_t ind) {
-			if (ind >= cols_number) {
-				throw std::out_of_range("");
-			}
-			return array[ind];
-		}
-		
+		void operator = (const Row& he) {}
+		/*Forbids to compare and to change value of the row 
+		 from the outside - only Matrix can do that*/
 		void operator *= (int k) {
 			for (size_t i = 0; i < cols_number; ++i) {
 				array[i] *= k;
@@ -38,26 +28,26 @@ class Matrix {
 			}
 			return true;
 		}
+		friend class Matrix;
+	public:		
+		Row(int k):cols_number(k), array(new int[cols_number]){}
 		
-		size_t Size() const {
-			return cols_number;
+		int& operator[] (size_t ind) {
+			if (ind >= cols_number) {
+				throw std::out_of_range("");
+			}
+			return array[ind];
 		}
 		
-		void operator = (const Row& he) {
-			if (array) {
-				delete [] array;
+		int operator[] (size_t ind) const {
+			if (ind >= cols_number) {
+				throw std::out_of_range("");
 			}
-			array = new int[he.cols_number];
-			for (size_t i = 0; i < he.cols_number; ++i) {
-				array[i] = he.array[i];
-			}
-			cols_number = he.cols_number;
+			return array[ind];
 		}
 		
 		~Row() {
-			if (array) {
-				delete [] array;
-			}
+			delete [] array;
 		}
 	};
 	size_t rows_number;
@@ -66,13 +56,22 @@ class Matrix {
 	void operator = (const Matrix &he){};
 public:
 
-	Matrix(size_t rows_number = 0, size_t cols_number = 0):rows_number(rows_number), rows(new Row[rows_number]) {
+	Matrix(size_t rows_number = 0, size_t cols_number = 0):rows_number(rows_number), 
+	rows(static_cast<Row*>(operator new[] (rows_number * sizeof(Row))))//No constructor calling
+	{
 		for (size_t i = 0; i < rows_number; ++i) {
-			rows[i] = Row(cols_number);
+			new(rows + i)  Row(cols_number);
 		}
 	}
 	
 	Row& operator[] (size_t ind) {
+		if (ind >= rows_number) {
+			throw std::out_of_range("");
+		}
+		return rows[ind];
+	}
+	
+	const Row& operator[] (size_t ind) const {
 		if (ind >= rows_number) {
 			throw std::out_of_range("");
 		}
@@ -103,7 +102,7 @@ public:
 	}
 	
 	size_t GetColumns() const {
-		return rows[0].Size();
+		return rows[0].cols_number;
 	}
 	
 	size_t GetRows() const {
@@ -111,7 +110,10 @@ public:
 	}
 	
 	~Matrix() {
-		delete [] rows;
+		for (size_t i = 0; i < rows_number; ++i) {
+			rows[i].~Row();
+		}
+		operator delete [](rows);
 	}
 };
 
@@ -120,6 +122,7 @@ int main(int argc, char **argv) {
 		int row1 = atoi(argv[1]), col1 = atoi(argv[2]), 
 		row2 = atoi(argv[3]), col2 = atoi(argv[4]);
 		Matrix a(row1, col1), b(row2, col2);
+		const Matrix c(row1, col1);
 		for (int i = 0; i < row1; ++i) {
 			for (int j = 0; j < col1; ++j) {
 				a[i][j] = i;
@@ -143,6 +146,8 @@ int main(int argc, char **argv) {
 				cout<<a.GetRows()<<endl;
 			} else if (!strcmp(argv[k], "cols")) {
 				cout<<a.GetColumns() << endl;
+			} else if (!strcmp(argv[k], "const")) {
+				cout << c[1][2] << endl;
 			} else {
 				cout << a[argv[k][0] - '0'][argv[k][1] - '0'] << endl;
 			}
