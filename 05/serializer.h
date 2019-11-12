@@ -2,12 +2,11 @@
 #include <string.h>
 #include <cstdlib>
 #include <climits>
-#
 #pragma once
 
 enum class Error
 {
-    NoError,
+	NoError,
     CorruptedArchive
 };
 
@@ -27,18 +26,17 @@ public:
     }
 
     template <class... ArgsT>
-    Error operator()(ArgsT... args)
+    Error operator()(ArgsT&&... args)
     {
-        return process(args...);
+		return process(std::forward<ArgsT>(args)...);
     }
     
 private:
     std::ostream& out_;
     template<class Current, class... Rest>
-    Error process(Current &&cur, Rest&&... tail) {
-		if (process(cur) != Error::NoError) {
+	Error process(Current&& cur, Rest&&... tail) {
+		if (process(std::forward<Current>(cur)) != Error::NoError) 
 			return Error::CorruptedArchive;
-		}
 		return process(std::forward<Rest>(tail)...);
 	}
 
@@ -55,6 +53,7 @@ private:
 			out_ << "false" << Separator;
 		return Error::NoError;
 	}
+	
 	Error process(uint64_t val)
 	{
 		out_ << val << Separator;
@@ -62,8 +61,6 @@ private:
 	}
 		
 };
-
-
 
 class Deserializer
 {
@@ -82,7 +79,7 @@ public:
 	template <class... ArgsT>
 	Error operator()(ArgsT&&... args)
 	{
-		return process(args...);
+		return process(std::forward<ArgsT>(args)...);
 	}
 	
 private:
@@ -110,18 +107,15 @@ private:
 		std::string text;
 		in_ >> text;
 		value = std::stoull(text.c_str());
-		if (text[0] == '-' || errno) {
+		if (text[0] == '-' || errno) 
 			return Error::CorruptedArchive;
-		}
-
 		return Error::NoError;
 	}
 
 	template<class Current, class... Rest>
    	Error process(Current &&cur, Rest&&... tail) {
-		if (process(cur) != Error::NoError) {
+		if (process(std::forward<Current>(cur)) != Error::NoError) 
 			return Error::CorruptedArchive;
-		}
 		return process(std::forward<Rest>(tail)...);
 	}
 };
