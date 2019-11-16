@@ -10,7 +10,7 @@ using namespace std;
 void format(string& a, string& what) {}
 
 template<class Cur, class... Tail>
-void format(string &a, string what, Cur &&cur, Tail&&... Rest ) {
+void format(string &a, string &what, Cur &&cur, Tail&&... Rest ) {
 	stringstream buf;
 	buf << forward<Cur>(cur);
 	string val;
