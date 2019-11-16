@@ -26,8 +26,8 @@ void format(string &a, string &what, Cur &&cur, Tail&&... Rest ) {
 	format(a, what, forward<Tail>(Rest)...);
 }
 
-template<class... Tail>
-string format(const char *a, Tail&&...Rest) {
+template<class str_type, class... Tail>
+string format(str_type a, Tail&&...Rest) {
 	string ans(a), what = "{0}";
 	format(ans, what, forward<Tail>(Rest)...);
 	unsigned len = ans.length();
@@ -56,7 +56,8 @@ ostream& operator <<(ostream& out, const Test& he) {
 }
 
 int main() {
-	auto text = format("{1} {1} {2} {3} {4} {3} {1} {0}", 2, "one", 100000000000, true, Test());
+	string st("{1} {1} {2} {3} {4} {3} {1} {0}");
+	auto text = format(st, 2, "one", 100000000000, true, Test());
 	assert(text == "one one 100000000000 1 3 1  a test 80000000000 1 one 2");
 	text = format("{2}!{1},{2}-{0}?",  false, "one", 2);
 	assert(text == "2!one,2-0?");
