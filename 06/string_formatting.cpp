@@ -26,8 +26,8 @@ void format(string &a, string &what, Cur &&cur, Tail&&... Rest ) {
 	format(a, what, forward<Tail>(Rest)...);
 }
 
-template<class str_type, class... Tail>
-string format(str_type a, Tail&&...Rest) {
+template<class Str_type, class... Tail>
+string format(Str_type a, Tail&&...Rest) {
 	string ans(a), what = "{0}";
 	format(ans, what, forward<Tail>(Rest)...);
 	unsigned len = ans.length();
