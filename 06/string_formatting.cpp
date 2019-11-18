@@ -7,29 +7,25 @@
 
 using namespace std;
 
-void format(string& a, string& what) {}
+void form(string& a, string& what) {}
 
 template<class Cur, class... Tail>
-void format(string &a, string &what, Cur &&cur, Tail&&... Rest ) {
+void form(string &a, string &what, Cur &&cur, Tail&&... Rest ) {
 	stringstream buf;
 	buf << forward<Cur>(cur);
-	string val;
 	unsigned k;
-	char tmp;
-	while (buf.get(tmp)) {
-		val += tmp;
-	}
+	unsigned siz = what.size();
 	while ((k = a.find(what)) != UINT_MAX) {
-		a.replace(k, 3, val);
+		a.replace(k, siz, buf.str());
 	}
 	what = '{' + to_string((atoi(what.c_str() + 1) + 1)) +'}';
-	format(a, what, forward<Tail>(Rest)...);
+	form(a, what, forward<Tail>(Rest)...);
 }
 
 template<class Str_type, class... Tail>
 string format(Str_type a, Tail&&...Rest) {
 	string ans(a), what = "{0}";
-	format(ans, what, forward<Tail>(Rest)...);
+	form(ans, what, forward<Tail>(Rest)...);
 	unsigned len = ans.length();
 	for (unsigned i = 0; i < len; ++i) {
 		if (ans[i] == '{' || ans[i] == '}') {
