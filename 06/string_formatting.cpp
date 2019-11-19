@@ -23,9 +23,9 @@ string format(Str_type &&a, Tail&&...rest) {
 	string ans(a);
 	vector<string> param;
 	form(param, forward<Tail>(rest)...);
-	size_t len = ans.size(), idx = 0, size = param.size();
+	size_t idx = 0, size = param.size();
 	while ((idx = ans.find('{')) != ans.npos) {
-		size_t next, pos;
+		size_t next = 0, pos = 0;
 		try {
 			pos = stoi(ans.substr(idx + 1), &next, 10);
 		} catch(invalid_argument &k) {
@@ -37,10 +37,8 @@ string format(Str_type &&a, Tail&&...rest) {
 		//из-за скобок прибавляем к next двойку
 		ans.replace(idx, next + 2, param[pos]);
 	}
-  	for (size_t i = 0; i < len; ++i) {
-		if (ans[i] == '}') {
-			throw runtime_error("Invalid argument\n");
-		}
+	if (ans.find('}') != ans.npos) {
+		throw runtime_error("Invalid argument\n");
 	}
 	return ans;
 }
