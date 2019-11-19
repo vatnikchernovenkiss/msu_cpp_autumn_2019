@@ -4,31 +4,41 @@
 #include <stdexcept>
 #include <iostream>
 #include <limits.h>
+#include <vector>
 
 using namespace std;
 
-void form(string& a, string& what) {}
+void form(vector<string> &param) {}
 
 template<class Cur, class... Tail>
-void form(string &a, string &what, Cur &&cur, Tail&&... Rest ) {
+void form(vector<string> &param, Cur &&cur, Tail&&... rest ) {
 	stringstream buf;
 	buf << forward<Cur>(cur);
-	unsigned k;
-	unsigned siz = what.size();
-	while ((k = a.find(what)) != UINT_MAX) {
-		a.replace(k, siz, buf.str());
-	}
-	what = '{' + to_string((atoi(what.c_str() + 1) + 1)) +'}';
-	form(a, what, forward<Tail>(Rest)...);
+	param.push_back(buf.str());
+	form(param, forward<Tail>(rest)...);
 }
 
 template<class Str_type, class... Tail>
-string format(Str_type a, Tail&&...Rest) {
-	string ans(a), what = "{0}";
-	form(ans, what, forward<Tail>(Rest)...);
-	unsigned len = ans.length();
-	for (unsigned i = 0; i < len; ++i) {
-		if (ans[i] == '{' || ans[i] == '}') {
+string format(Str_type &&a, Tail&&...rest) {
+	string ans(a);
+	vector<string> param;
+	form(param, forward<Tail>(rest)...);
+	size_t len = ans.size(), idx = 0, size = param.size();
+	while ((idx = ans.find('{')) != ans.npos) {
+		size_t next, pos;
+		try {
+			pos = stoi(ans.substr(idx + 1), &next, 10);
+		} catch(invalid_argument &k) {
+			throw runtime_error("Invalid argument\n");
+		}
+		if (ans[next + idx + 1] != '}' || pos >= size) {
+			throw runtime_error("Invalid argument\n");
+		}
+		//из-за скобок прибавляем к next двойку
+		ans.replace(idx, next + 2, param[pos]);
+	}
+  	for (size_t i = 0; i < len; ++i) {
+		if (ans[i] == '}') {
 			throw runtime_error("Invalid argument\n");
 		}
 	}
@@ -58,6 +68,7 @@ int main() {
 	text = format("{2}!{1},{2}-{0}?",  false, "one", 2);
 	assert(text == "2!one,2-0?");
 	bool check = false;
+	
 	try {
 		text = format("{1}{2}", 1, 2);
 		check = true;
