@@ -176,8 +176,9 @@ private:
     pointer data;
     size_type cur_size;
 public:
+
 	Vector(size_type size = 0):alloc(), allocated(base_size),
-		data(alloc.allocate(allocated)), cur_size(size)
+	data(alloc.allocate(allocated)), cur_size(size)
     {
         for (pointer ptr = data; ptr != data + size; ++ptr) {
             alloc.construct(ptr);
