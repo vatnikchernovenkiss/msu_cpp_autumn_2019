@@ -33,7 +33,7 @@ public:
     
     size_type max_size() const 
     {
-		return std::numeric_limits<size_type>::max();
+        return std::numeric_limits<size_type>::max();
     }
 };
 
@@ -254,7 +254,7 @@ public:
     
     void resize(size_type newSize)
     {
-		if (newSize < cur_size) {
+        if (newSize < cur_size) {
             for (pointer ptr = data + newSize; ptr != data + cur_size; ++ptr) {
                 alloc.destroy(ptr);
             }
