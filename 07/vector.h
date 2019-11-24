@@ -241,15 +241,15 @@ public:
     void reserve(size_type size)
     {
         if (size > allocated) {
-			pointer tmp = alloc.allocate(size);
-			for (size_type i = 0; i < size; ++i) {
-				alloc.construct(tmp + i, std::move(*(data + i)));
-				alloc.destroy(data + i);
-			}
-			alloc.deallocate(data, allocated);
-			data = tmp;
-			allocated = size;
-		}
+            pointer tmp = alloc.allocate(size);
+            for (size_type i = 0; i < size; ++i) {
+                alloc.construct(tmp + i, std::move(*(data + i)));
+                alloc.destroy(data + i);
+            }
+            alloc.deallocate(data, allocated);
+            data = tmp;
+            allocated = size;
+        }
     }
     
     void resize(size_type newSize)
