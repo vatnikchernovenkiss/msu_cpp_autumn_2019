@@ -20,44 +20,44 @@ class ThreadPool
 	condition_variable cond;
 public:
     explicit ThreadPool(size_t poolSize):fin(false) {
-		for (size_t i = 0; i < poolSize; ++i) {
-			threads.emplace_back([this]{
-				while (true) {
-					unique_lock<mutex> lock(m);
-					cond.wait(lock, 
-					[this](){return fin || !tasks.empty();});
-					if (fin && tasks.empty()) {
-						lock.unlock();
-						return;
-					}
-					auto fun = tasks.front();
-					tasks.pop();
-					lock.unlock();
-					fun();	
-				}
-			});
-		}
-	}	
+        for (size_t i = 0; i < poolSize; ++i) {
+            threads.emplace_back([this]{
+                while (true) {
+                    unique_lock<mutex> lock(m);
+                    cond.wait(lock, 
+                    [this](){return fin || !tasks.empty();});
+                    if (fin && tasks.empty()) {
+                        lock.unlock();
+                        return;
+                    }
+                    auto fun = tasks.front();
+                    tasks.pop();
+                    lock.unlock();
+                    fun();	
+                }
+            });
+        }
+    }	
     
     template <class Func, class... Args>
     auto exec(Func func, Args... args) -> future<decltype(func(args...))> {
-		auto cur = make_shared<packaged_task<typename result_of<Func(Args...)>::type()>>(
-            bind(forward<Func>(func), forward<Args>(args)...));
-		auto res = cur->get_future();
-		m.lock();
-		tasks.emplace([cur](){ (*cur)(); });
-		m.unlock();
-		cond.notify_all();
-		return res;
-	}
+        auto cur = make_shared<packaged_task<typename result_of<Func(Args...)>::type()>>(
+        bind(forward<Func>(func), forward<Args>(args)...));
+        auto res = cur->get_future();
+        m.lock();
+        tasks.emplace([cur](){ (*cur)(); });
+        m.unlock();
+        cond.notify_all();
+        return res;
+    }
 	
-	~ThreadPool() {
-		fin = true;
-		cond.notify_all();
-		for (thread &thr: threads) {
-			thr.join();
-		}
-	}
+    ~ThreadPool() {
+        fin = true;
+        cond.notify_all();
+        for (thread &thr: threads) {
+            thr.join();
+        }
+    }
 };
 
 struct A {};
