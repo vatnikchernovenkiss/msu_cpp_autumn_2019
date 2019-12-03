@@ -27,16 +27,16 @@ public:
                     cond.wait(lock, 
                     [this](){return fin || !tasks.empty();});
                     if (fin) {
-						while (true) {
-							if (tasks.empty()) {
-								lock.unlock();
-								return;
-							}
-							auto fun = tasks.front();
-							tasks.pop();
-							lock.unlock();
-							fun();
-							lock.lock();
+                        while (true) {
+                            if (tasks.empty()) {
+                                lock.unlock();
+                                return;
+                            }
+                            auto fun = tasks.front();
+                            tasks.pop();
+                            lock.unlock();
+                            fun();
+                            lock.lock();
 						}	
                     }
                     auto fun = tasks.front();
