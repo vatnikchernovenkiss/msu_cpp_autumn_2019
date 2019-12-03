@@ -26,9 +26,18 @@ public:
                     unique_lock<mutex> lock(m);
                     cond.wait(lock, 
                     [this](){return fin || !tasks.empty();});
-                    if (fin && tasks.empty()) {
-                        lock.unlock();
-                        return;
+                    if (fin) {
+						while (true) {
+							if (tasks.empty()) {
+								lock.unlock();
+								return;
+							}
+							auto fun = tasks.front();
+							tasks.pop();
+							lock.unlock();
+							fun();
+							lock.lock();
+						}	
                     }
                     auto fun = tasks.front();
                     tasks.pop();
@@ -40,9 +49,9 @@ public:
     }	
     
     template <class Func, class... Args>
-    auto exec(Func func, Args... args) -> future<decltype(func(args...))> {
+    auto exec(Func func, Args...args) -> future<decltype(func(args...))> {
         auto cur = make_shared<packaged_task<typename result_of<Func(Args...)>::type()>>(
-        bind(forward<Func>(func), forward<Args>(args)...));
+        bind(func, args...));
         auto res = cur->get_future();
         m.lock();
         tasks.emplace([cur](){ (*cur)(); });
