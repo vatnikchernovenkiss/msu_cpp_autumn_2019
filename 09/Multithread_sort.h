@@ -15,7 +15,8 @@ void multi_sort(const char *in_file, const char *out_file) {
     uint64_t cur_min = 0;
     uint64_t count_min = 0;
     std::condition_variable_any cond;
-    bool fl = false, null_check = false;
+    bool fl = false;
+    bool null_check = false;
     uint64_t count_min_local[2] = {0, 0};
     std::recursive_mutex m;
     std::ofstream out(out_file, std::ios::binary);
@@ -59,7 +60,7 @@ void multi_sort(const char *in_file, const char *out_file) {
                     }		
                     if (! cur_min) {
                         null_check = true;
-					}
+                    }
                     m.unlock();
                     cond.notify_one();
                     finished = 0;
