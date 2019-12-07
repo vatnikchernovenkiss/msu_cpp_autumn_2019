@@ -8,7 +8,7 @@
 constexpr size_t type_size = sizeof(uint64_t);
 
 void multi_sort(const char *in_file, const char *out_file) {
-	int finished = 0;
+    int finished = 0;
     uint64_t total_min = 0;
     uint64_t cur_min_local[2] = {std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::max()};
     uint64_t checked = 0;
@@ -58,7 +58,7 @@ void multi_sort(const char *in_file, const char *out_file) {
                         count_min = count_min_local[0] + count_min_local[1];
                     }		
                     if (! cur_min) {
-						null_check = true;
+                        null_check = true;
 					}
                     m.unlock();
                     cond.notify_one();
@@ -83,10 +83,10 @@ void multi_sort(const char *in_file, const char *out_file) {
                 }
                 m.unlock();
             }
-	        in.close();
+            in.close();
         }, i);
     }
-	pair[0].join();
-	pair[1].join();
+    pair[0].join();
+    pair[1].join();
 	out.close();
 }
