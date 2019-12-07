@@ -24,11 +24,6 @@ public:
             threads.emplace_back([this]{
                 while (true) {
                     if (fin) {
-                        /* Если в момент вызова деструктора данная нить выполняла таску,
-                        то после ее окончания она уже не будет спать, ожидая уведомления,
-                        а просто будет ждать разблокировки  мьютекса, и можно будет 
-                        корректно завершиться. Если же в момент вызова деструктора нить спала,
-                        она получит уведомление, выполнит таску и все равно зайдет сюда*/
                         while (true) {
                             m.lock();
                             if (tasks.empty()) {
@@ -65,12 +60,15 @@ public:
         m.lock();
         tasks.emplace([cur](){ (*cur)(); });
         m.unlock();
-        cond.notify_all();
+        cond.notify_one();
         return res;
     }
 	
     ~ThreadPool() {
-        fin = true;
+        {
+            unique_lock<std::mutex> lock(mutex);
+            fin = true;
+        }
         cond.notify_all();
         for (thread &thr: threads) {
             thr.join();
@@ -83,7 +81,7 @@ struct A {};
 int foo(const A&) {return -6;}
 
 int main() {
-	ThreadPool pool(8);
+	ThreadPool pool(4);
 
 	auto task1 = pool.exec(foo, A());
 
@@ -91,6 +89,6 @@ int main() {
 	cout<<task2.get();
 	cout<<task1.get();
 	for (int i = 0; i < 10000; ++i) {
-		 cout<<pool.exec([i]() { return i; }).get() << endl;
+		 pool.exec([i]() {return i; });
 	}
 }
