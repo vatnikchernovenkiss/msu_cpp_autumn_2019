@@ -1,0 +1,32 @@
+В hive выполнены следующие команды:
+
+create table cited (citing bigint, cited bigint)
+row format delimited
+fields terminated by ','
+stored as textfile;
+
+create table apat (patent bigint, year smallint, pdate smallint, appyear float, country string, postate string, assignee double, asscode smallint, claims string, nclass smallint, cat smallint, subcat smallint, cmade float, crecive smallint, ratiocit float, general double, original double, fwdaplag double, dckgtlag double, selfctub double, selfctlb double, secdupbd string, secdlwbd string)
+row format delimited
+fields terminated by ','
+stored as textfile;
+
+load data local inpath 'apat63_99.txt' overwrite into table apat;
+
+load data local inpath 'cite75_99.txt' overwrite into table cited;
+
+select patent, count(patent) as agg from cited inner join (select * from apat where year = 1990) as proxy on cited.cited = proxy.patent group by patent order by agg desc limit 10; 
+
+В результате получаем 
+
+4901307    287
+4940916    221
+4965188    184
+4916441    169
+4951601    160
+4944836    158
+4977455    154
+4953080    151
+4980836    148
+4899136    140
+
+где первая колонка - номер патента, вторая - число цитирований за 1990 год.
